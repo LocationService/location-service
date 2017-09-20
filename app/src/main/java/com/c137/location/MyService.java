@@ -30,6 +30,7 @@ public class MyService extends Service {
     private static final String HMAC_KEY = "ea86ec783c52d9e26607d11a1247485a";
 
     private static final String API_URL = "http://137.74.197.251:8083/";
+//    private static final String API_URL = "http://192.168.31.216:8083/";
     private static final String API_KEY = "f5ee5dee5f9ded00a624ff4bf34eb3d3";
 
     final String LOG_TAG = "Location";
@@ -107,8 +108,8 @@ public class MyService extends Service {
         if (location == null)
             return;
         final String provider = location.getProvider();
-        final String lat = String.valueOf(location.getLatitude());
-        final String lng = String.valueOf(location.getLongitude());
+        final Double lat = location.getLatitude();
+        final Double lng = location.getLongitude();
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
