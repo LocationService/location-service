@@ -25,12 +25,12 @@ import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONObject;
 
 
-public class MyService extends Service {
+public class LocationService extends Service {
     private static final String HMAC_ALGORITHM = "HmacSHA1";
     private static final String HMAC_KEY = "ea86ec783c52d9e26607d11a1247485a";
 
-    private static final String API_URL = "http://137.74.197.251:8083/";
-//    private static final String API_URL = "http://192.168.31.216:8083/";
+//    private static final String API_URL = "http://137.74.197.251:8083/";
+    private static final String API_URL = "http://192.168.31.216:8083/";
     private static final String API_KEY = "f5ee5dee5f9ded00a624ff4bf34eb3d3";
 
     final String LOG_TAG = "Location";
@@ -148,6 +148,7 @@ public class MyService extends Service {
                     Log.e(LOG_TAG, e.toString());
                 }
 
+                Log.d(LOG_TAG, params.toString());
                 return params;
             }
             @Override
