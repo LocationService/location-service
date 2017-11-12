@@ -30,10 +30,7 @@ public class LocationClient {
     private RequestQueue queue;
 
     private static final String HMAC_ALGORITHM = "HmacSHA1";
-    private static final String HMAC_KEY = "ea86ec783c52d9e26607d11a1247485a";
-
     private static final String API_URL = "http://192.168.31.216:8083/";
-    private static final String API_KEY = "f5ee5dee5f9ded00a624ff4bf34eb3d3";
 
     private final String LOG_TAG = "Location Request";
 
@@ -51,7 +48,7 @@ public class LocationClient {
         final Double lat = location.getLatitude();
         final Double lng = location.getLongitude();
         String androidID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-        
+
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("device_id", androidID);
@@ -65,6 +62,7 @@ public class LocationClient {
     }
 
     private void makePost(int method, String path, final JSONObject jsonObject) {
+        final String apiKey = context.getResources().getString(R.string.location_api_key);
         String url = API_URL + path;
         StringRequest stringRequest = new StringRequest(method, url,
                 new Response.Listener<String>() {
@@ -96,7 +94,7 @@ public class LocationClient {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + API_KEY);
+                headers.put("Authorization", "Bearer " + apiKey);
                 return headers;
             }
         };
@@ -114,7 +112,8 @@ public class LocationClient {
     }
 
     private String makeSign(String data) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
-        SecretKeySpec signingKey = new SecretKeySpec(HMAC_KEY.getBytes(), HMAC_ALGORITHM);
+        String hmac = context.getResources().getString(R.string.location_hmac_key);
+        SecretKeySpec signingKey = new SecretKeySpec(hmac.getBytes(), HMAC_ALGORITHM);
         Mac mac = Mac.getInstance(HMAC_ALGORITHM);
         mac.init(signingKey);
         return toHexString(mac.doFinal(data.getBytes()));
