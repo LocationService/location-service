@@ -11,8 +11,7 @@ import android.support.v4.app.ActivityCompat;
 
 public class MainActivity extends Activity {
     private String[] permissions = new String[]{
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.ACCESS_FINE_LOCATION
     };
 
     @Override
