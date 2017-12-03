@@ -31,9 +31,7 @@ public class LocationClient {
     private RequestQueue queue;
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
-//    private static final String API_URL = " https://api.c137-location.space/";
-//    private static final String API_URL = " http://192.168.31.216:4000/";
-    private static final String API_URL = " http://192.168.43.136:4000/";
+    private static final String API_URL = " https://api.c137-location.space/";
 
     private final String LOG_TAG = "LocationClient";
 
@@ -181,7 +179,7 @@ public class LocationClient {
     }
 
     private String makeSign(String data) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
-        String hmacKey = context.getResources().getString(R.string.location_hmac_key_develop);
+        String hmacKey = context.getResources().getString(R.string.location_hmac_key);
         SecretKeySpec signingKey = new SecretKeySpec(hmacKey.getBytes(), HMAC_ALGORITHM);
         Mac mac = Mac.getInstance(HMAC_ALGORITHM);
         mac.init(signingKey);
