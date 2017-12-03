@@ -65,6 +65,7 @@ public class LocationClient {
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Exception while create register json object: " + e.toString());
             Crashlytics.logException(e);
+            return;
         }
         makePost(Request.Method.POST, "devices/auth", jsonObject, false, new VolleyCallback(){
             @Override
@@ -99,6 +100,7 @@ public class LocationClient {
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Exception while create location json object: " + e.toString());
             Crashlytics.logException(e);
+            return;
         }
         makePost(Request.Method.POST, "devices/locations", jsonObject, true, new VolleyCallback(){
             @Override
