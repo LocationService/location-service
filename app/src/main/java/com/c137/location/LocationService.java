@@ -38,13 +38,14 @@ public class LocationService extends Service {
     };
 
     public void onCreate() {
-        locationClient = new LocationClient(this);
-        locationClient.register(
+        locationClient = new LocationClient(
+                this,
                 Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID),
                 Build.MANUFACTURER,
                 Build.MODEL,
                 Build.VERSION.RELEASE
         );
+        locationClient.register();
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 60, 100, locationListener);
@@ -57,7 +58,6 @@ public class LocationService extends Service {
     }
 
     public void onDestroy() {
-        Log.d(LOG_TAG, "stop service");
         locationManager.removeUpdates(locationListener);
         super.onDestroy();
     }
