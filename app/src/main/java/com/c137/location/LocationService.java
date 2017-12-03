@@ -2,8 +2,10 @@ package com.c137.location;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,11 +38,17 @@ public class LocationService extends Service {
     };
 
     public void onCreate() {
-        Log.d(LOG_TAG, "start service");
         locationClient = new LocationClient(this);
+        locationClient.register(
+                Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID),
+                Build.MANUFACTURER,
+                Build.MODEL,
+                Build.VERSION.RELEASE
+        );
+
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 60, 100, locationListener);
-//         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 60, 100, locationListener);
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 60, 100, locationListener);
         super.onCreate();
     }
 

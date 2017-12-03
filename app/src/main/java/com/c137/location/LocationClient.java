@@ -2,7 +2,6 @@ package com.c137.location;
 
 import android.content.Context;
 import android.location.Location;
-import android.provider.Settings.Secure;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -29,14 +28,41 @@ public class LocationClient {
     private Context context;
     private RequestQueue queue;
 
-    private static final String HMAC_ALGORITHM = "HmacSHA1";
-    private static final String API_URL = "http://192.168.31.216:8083/";
+    private static final String HMAC_ALGORITHM = "HmacSHA256";
+    private static final String API_URL = " https://api.c137-location.space/";
 
     private final String LOG_TAG = "Location Request";
+    private String jwt;
 
     public LocationClient(Context context) {
         this.context = context;
         this.queue = Volley.newRequestQueue(context);
+    }
+
+    public void register(String deviceID, String manufacturer, String model, String androidRelease) {
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonAttributes = new JSONObject();
+        try {
+            jsonAttributes.put("device_id", deviceID);
+            jsonAttributes.put("manufacturer", manufacturer);
+            jsonAttributes.put("model", model);
+            jsonAttributes.put("android_release", androidRelease);
+
+            jsonObject.put("reg", jsonAttributes);
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, e.toString());
+        }
+        makePost(Request.Method.POST, "devices/auth", jsonObject, false, new VolleyCallback(){
+            @Override
+            public void onSuccess(String result){
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    jwt = jsonObject.get("jwt").toString();
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.toString());
+                }
+            }
+        });
     }
 
     public void makeLocation(Location location) {
@@ -47,27 +73,30 @@ public class LocationClient {
         final String provider = location.getProvider();
         final Double lat = location.getLatitude();
         final Double lng = location.getLongitude();
-        String androidID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
 
         JSONObject jsonObject = new JSONObject();
+        JSONObject jsonAttributes = new JSONObject();
         try {
-            jsonObject.put("device_id", androidID);
-            jsonObject.put("provider", provider);
-            jsonObject.put("lat", lat);
-            jsonObject.put("lng", lng);
+            jsonAttributes.put("provider", provider);
+            jsonAttributes.put("lat", lat);
+            jsonAttributes.put("lng", lng);
+            jsonObject.put("location", jsonAttributes);
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.toString());
         }
-        makePost(Request.Method.POST, "receiver/location", jsonObject);
+        makePost(Request.Method.POST, "devices/locations", jsonObject, true, new VolleyCallback(){
+            @Override
+            public void onSuccess(String result){}
+        });
     }
 
-    private void makePost(int method, String path, final JSONObject jsonObject) {
-        final String apiKey = context.getResources().getString(R.string.location_api_key);
+    private void makePost(int method, String path, final JSONObject jsonObject, final boolean auth, final VolleyCallback callback) {
         String url = API_URL + path;
         StringRequest stringRequest = new StringRequest(method, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        callback.onSuccess(response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -94,11 +123,26 @@ public class LocationClient {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + apiKey);
+                if (auth) {
+                    headers.put("Authorization", "Bearer " + jwt);
+                }
                 return headers;
             }
         };
         queue.add(stringRequest);
+    }
+
+    private String signData(String data) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+        String sign = makeSign(data);
+        return sign + "." + data;
+    }
+
+    private String makeSign(String data) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+        String hmacKey = context.getResources().getString(R.string.location_hmac_key);
+        SecretKeySpec signingKey = new SecretKeySpec(hmacKey.getBytes(), HMAC_ALGORITHM);
+        Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+        mac.init(signingKey);
+        return toHexString(mac.doFinal(data.getBytes()));
     }
 
     private String toHexString(byte[] bytes) {
@@ -109,18 +153,5 @@ public class LocationClient {
         }
 
         return formatter.toString();
-    }
-
-    private String makeSign(String data) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
-        String hmac = context.getResources().getString(R.string.location_hmac_key);
-        SecretKeySpec signingKey = new SecretKeySpec(hmac.getBytes(), HMAC_ALGORITHM);
-        Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-        mac.init(signingKey);
-        return toHexString(mac.doFinal(data.getBytes()));
-    }
-
-    private String signData(String data) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
-        String sign = makeSign(data);
-        return sign + "." + data;
     }
 }
