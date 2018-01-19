@@ -31,7 +31,6 @@ public class LocationClient {
     private RequestQueue queue;
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
-    private static final String API_URL = " https://api.c137-location.space/";
 
     private final String LOG_TAG = "LocationClient";
 
@@ -40,6 +39,7 @@ public class LocationClient {
     private String manufacturer;
     private String model;
     private String androidRelease;
+    private String apiUrl;
 
     public LocationClient(Context context, String deviceID, String manufacturer, String model, String androidRelease) {
         this.context = context;
@@ -48,6 +48,7 @@ public class LocationClient {
         this.model = model;
         this.androidRelease = androidRelease;
         this.queue = Volley.newRequestQueue(context);
+        this.apiUrl = context.getString(R.string.location_api_url);
     }
 
     public void register() {
@@ -107,7 +108,7 @@ public class LocationClient {
     }
 
     private void makePost(final int method, final String path, final JSONObject jsonObject, final boolean register, final VolleyCallback callback) {
-        String url = API_URL + path;
+        String url = apiUrl + path;
         Log.d(LOG_TAG, "Make " + method + " to " + path);
         StringRequest stringRequest = new StringRequest(method, url,
                 new Response.Listener<String>() {

@@ -33,7 +33,6 @@ public class MainActivity extends Activity {
         } else {
             requestPermissions();
         }
-
     }
 
     private void disableActivity() {
