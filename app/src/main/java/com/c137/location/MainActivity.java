@@ -5,9 +5,14 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
@@ -21,7 +26,44 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
-        requestPermissions();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent batteryIntent = buildBatteryOptimizationsIntent();
+        if (hasBatteryOptimizations() && hasBatteryOptimizationsAction(batteryIntent) && !isIgnoringBatteryOptimizations()) {
+            requestIgnoringBatteryOptimizations(batteryIntent);
+        } else {
+            requestPermissions();
+        }
+    }
+
+    private void requestIgnoringBatteryOptimizations(Intent intent) {
+        startActivity(intent);
+    }
+
+    private boolean hasBatteryOptimizations() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
+
+    private boolean hasBatteryOptimizationsAction(Intent intent) {
+        ComponentName cn = intent.resolveActivity(getPackageManager());
+        return cn != null;
+    }
+
+    private boolean isIgnoringBatteryOptimizations() {
+        String packageName = getPackageName();
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        return pm.isIgnoringBatteryOptimizations(packageName);
+    }
+
+    private Intent buildBatteryOptimizationsIntent() {
+        Intent intent = new Intent();
+        String packageName = getPackageName();
+        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        intent.setData(Uri.parse("package:" + packageName));
+        return intent;
     }
 
     @Override
@@ -30,8 +72,6 @@ public class MainActivity extends Activity {
             disableActivity();
             startLocationService();
             finish();
-        } else {
-            requestPermissions();
         }
     }
 
