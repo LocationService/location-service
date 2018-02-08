@@ -51,7 +51,7 @@ public class LocationClient {
         this.apiUrl = context.getString(R.string.location_api_url);
     }
 
-    public void register() {
+    public void register(final VolleyCallback callback) {
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonAttributes = new JSONObject();
         try {
@@ -76,11 +76,17 @@ public class LocationClient {
                     Log.e(LOG_TAG, "Exception while parse register json object: " + e.toString());
                     Crashlytics.logException(e);
                 }
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onError(VolleyError error) {
+                callback.onError(error);
             }
         });
     }
 
-    public void makeLocation(Location location) {
+    public void makeLocation(Location location, final VolleyCallback callback) {
         if (location == null) {
             return;
         }
@@ -88,6 +94,9 @@ public class LocationClient {
         final String provider = location.getProvider();
         final Double lat = location.getLatitude();
         final Double lng = location.getLongitude();
+        final Double alt = location.getAltitude();
+        final float speed = location.getSpeed();
+        final float acc = location.getAccuracy();
 
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonAttributes = new JSONObject();
@@ -95,6 +104,9 @@ public class LocationClient {
             jsonAttributes.put("provider", provider);
             jsonAttributes.put("lat", lat);
             jsonAttributes.put("lng", lng);
+            jsonAttributes.put("alt", alt);
+            jsonAttributes.put("speed", speed);
+            jsonAttributes.put("acc", acc);
             jsonObject.put("location", jsonAttributes);
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Exception while create location json object: " + e.toString());
@@ -103,7 +115,15 @@ public class LocationClient {
         }
         makePost(Request.Method.POST, "devices/locations", jsonObject, true, new VolleyCallback(){
             @Override
-            public void onSuccess(String result){}
+            public void onSuccess(String result) {
+                callback.onSuccess(result);
+            }
+
+
+            @Override
+            public void onError(VolleyError error) {
+                callback.onError(error);
+            }
         });
     }
 
@@ -126,8 +146,16 @@ public class LocationClient {
                             Log.d(LOG_TAG, "Error response " + error.networkResponse.statusCode);
                             Log.d(LOG_TAG, "Data: " + new String(error.networkResponse.data));
                             if (register && error.networkResponse.statusCode == 401) {
-                                register();
-                                makePost(method, path, jsonObject, false, callback);
+                                register(new VolleyCallback() {
+                                    @Override
+                                    public void onSuccess(String result) {
+                                        makePost(method, path, jsonObject, false, callback);
+                                    }
+
+                                    @Override
+                                    public void onError(VolleyError error) {
+                                    }
+                                });
                             }
                         } else {
                             Log.d(LOG_TAG, "Error response without network response");

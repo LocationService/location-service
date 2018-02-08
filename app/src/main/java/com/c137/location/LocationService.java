@@ -11,6 +11,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 
+import com.android.volley.VolleyError;
+
 public class LocationService extends Service {
     final String LOG_TAG = "Location";
 
@@ -19,7 +21,15 @@ public class LocationService extends Service {
 
     private LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
-            locationClient.makeLocation(location);
+            locationClient.makeLocation(location, new VolleyCallback() {
+                @Override
+                public void onSuccess(String result) {
+                }
+
+                @Override
+                public void onError(VolleyError error) {
+                }
+            });
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -29,7 +39,15 @@ public class LocationService extends Service {
         public void onProviderEnabled(String provider) {
             Log.d(LOG_TAG, provider + " enabled");
             Location location = locationManager.getLastKnownLocation(provider);
-            locationClient.makeLocation(location);
+            locationClient.makeLocation(location, new VolleyCallback() {
+                @Override
+                public void onSuccess(String result) {
+                }
+
+                @Override
+                public void onError(VolleyError error) {
+                }
+            });
         }
 
         public void onProviderDisabled(String provider) {
@@ -45,7 +63,16 @@ public class LocationService extends Service {
                 Build.MODEL,
                 Build.VERSION.RELEASE
         );
-        locationClient.register();
+
+        locationClient.register(new VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+            }
+
+            @Override
+            public void onError(VolleyError error) {
+            }
+        });
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 60, 100, locationListener);
