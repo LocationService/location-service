@@ -64,19 +64,9 @@ public class LocationService extends Service {
                 Build.VERSION.RELEASE
         );
 
-        locationClient.register(new VolleyCallback() {
-            @Override
-            public void onSuccess(String result) {
-            }
-
-            @Override
-            public void onError(VolleyError error) {
-            }
-        });
-
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 60, 100, locationListener);
-//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 60, 100, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 60, 100, locationListener);
         super.onCreate();
     }
 

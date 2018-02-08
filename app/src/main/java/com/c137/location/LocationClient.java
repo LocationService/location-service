@@ -94,9 +94,9 @@ public class LocationClient {
         final String provider = location.getProvider();
         final Double lat = location.getLatitude();
         final Double lng = location.getLongitude();
-        final Double alt = location.getAltitude();
+        final Double altitude = location.getAltitude();
         final float speed = location.getSpeed();
-        final float acc = location.getAccuracy();
+        final float accuracy = location.getAccuracy();
 
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonAttributes = new JSONObject();
@@ -104,9 +104,9 @@ public class LocationClient {
             jsonAttributes.put("provider", provider);
             jsonAttributes.put("lat", lat);
             jsonAttributes.put("lng", lng);
-            jsonAttributes.put("alt", alt);
+            jsonAttributes.put("altitude", altitude);
             jsonAttributes.put("speed", speed);
-            jsonAttributes.put("acc", acc);
+            jsonAttributes.put("accuracy", accuracy);
             jsonObject.put("location", jsonAttributes);
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Exception while create location json object: " + e.toString());
